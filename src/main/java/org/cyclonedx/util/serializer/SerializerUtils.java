@@ -13,13 +13,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SerializerUtils
 {
-  private static final Logger LOGGER = Logger.getLogger(SerializerUtils.class.getName());
-
   public static void serializeHashXml(final ToXmlGenerator toXmlGenerator, final Hash hash) throws IOException {
     toXmlGenerator.writeStartObject();
     toXmlGenerator.setNextIsAttribute(true);
@@ -46,12 +42,10 @@ public class SerializerUtils
     }
     VersionFilter filter = findVersionFilter(obj.getClass(), fieldName);
     if (filter != null && filter.value().getVersion() > version.getVersion()) {
-      if (LOGGER.isLoggable(Level.FINE)) {
-        LOGGER.fine(String.format(
-            "Skipping field '%s' on %s: introduced in version %s but generating for version %s",
-            fieldName, obj.getClass().getSimpleName(),
-            filter.value().getVersionString(), version.getVersionString()));
-      }
+      DebugLog.fine(SerializerUtils.class, () -> String.format(
+          "Skipping field '%s' on %s: introduced in version %s but generating for version %s",
+          fieldName, obj.getClass().getSimpleName(),
+          filter.value().getVersionString(), version.getVersionString()));
       return false;
     }
     return true;
@@ -85,12 +79,10 @@ public class SerializerUtils
           .getField(enumValue.name())
           .getAnnotation(VersionFilter.class);
       if (filter != null && filter.value().getVersion() > version.getVersion()) {
-        if (LOGGER.isLoggable(Level.FINE)) {
-          LOGGER.fine(String.format(
-              "Skipping %s.%s: introduced in version %s but generating for version %s",
-              enumValue.getClass().getSimpleName(), enumValue.name(),
-              filter.value().getVersionString(), version.getVersionString()));
-        }
+        DebugLog.fine(SerializerUtils.class, () -> String.format(
+            "Skipping %s.%s: introduced in version %s but generating for version %s",
+            enumValue.getClass().getSimpleName(), enumValue.name(),
+            filter.value().getVersionString(), version.getVersionString()));
         return false;
       }
       return true;
