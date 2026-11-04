@@ -11,14 +11,10 @@ import org.cyclonedx.model.VersionFilter;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class CustomSerializerModifier
     extends BeanSerializerModifier
 {
-  private static final Logger LOGGER = Logger.getLogger(CustomSerializerModifier.class.getName());
-
   private final Version version;
 
   private final boolean isXml;
@@ -42,12 +38,10 @@ public class CustomSerializerModifier
       BeanPropertyWriter writer = iterator.next();
       VersionFilter filter = writer.getAnnotation(VersionFilter.class);
       if (filter != null && filter.value().getVersion() > version.getVersion()) {
-        if (LOGGER.isLoggable(Level.FINE)) {
-          LOGGER.fine(String.format(
-              "Removing field '%s' on %s: introduced in version %s but generating for version %s",
-              writer.getName(), beanDesc.getBeanClass().getSimpleName(),
-              filter.value().getVersionString(), version.getVersionString()));
-        }
+        DebugLog.fine(CustomSerializerModifier.class, () -> String.format(
+            "Removing field '%s' on %s: introduced in version %s but generating for version %s",
+            writer.getName(), beanDesc.getBeanClass().getSimpleName(),
+            filter.value().getVersionString(), version.getVersionString()));
         iterator.remove();
       }
     }
